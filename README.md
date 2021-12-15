@@ -37,6 +37,8 @@ def order_drink(event: Input):
 @lex.fulfillment("Confirmation")
 def confirmation(event: Input):
   return finish_order(event)
+
+handler = lex.handler()
 ```
 
 On top of that, the `Input` object that you can optionally request in the parameters of a handler makes it much
