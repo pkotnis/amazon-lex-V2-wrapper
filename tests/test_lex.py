@@ -6,24 +6,24 @@ lex = Lex()
 mock = Mock()
 
 
-@lex.dialog("available-intent")
-def available_intent():
-    mock.dialog_available_intent()
-
-
 @lex.dialog("unavailable-intent")
-def unavailable_intent():
+def dialog_unavailable_intent():
     mock.dialog_unavailable_intent()
 
 
-@lex.fulfillment("available-intent")
-def available_intent():
-    mock.fulfillment_available_intent()
+@lex.dialog("available-intent")
+def dialog_available_intent():
+    mock.dialog_available_intent()
 
 
 @lex.fulfillment("unavailable-intent")
-def unavailable_intent():
+def fulfillment_unavailable_intent():
     mock.fulfillment_unavailable_intent()
+
+
+@lex.fulfillment("available-intent")
+def fulfillment_available_intent(slots, session_attributes, request_attributes):
+    mock.fulfillment_available_intent(slots, session_attributes, request_attributes)
 
 
 handler = lex.handler()
@@ -47,7 +47,7 @@ def test_dialog():
             "version": "string",
         },
         "interpretations": [],
-        "requestAttributes": {"string": "string"},
+        "requestAttributes": {"request_1": "request_value"},
         "sessionState": {
             "activeContexts": [
                 {
@@ -56,15 +56,15 @@ def test_dialog():
                     "timeToLive": {"timeToLiveInSeconds": 123, "turnsToLive": 33},
                 }
             ],
-            "sessionAttributes": {"string": "string"},
+            "sessionAttributes": {"session_1": "session_value"},
             "dialogAction": {"slotToElicit": "string", "type": "Close"},
             "intent": {
                 "confirmationState": "Confirmed",
                 "name": "available-intent",
                 "slots": {
-                    "string": {
+                    "slot_1": {
                         "value": {
-                            "interpretedValue": "string",
+                            "interpretedValue": "slot_value",
                             "originalValue": "string",
                             "resolvedValues": ["string"],
                         }
@@ -78,10 +78,10 @@ def test_dialog():
     }
 
     handler(input_event, {})
-    mock.dialog_available_intent.assert_called_once()
     mock.dialog_unavailable_intent.assert_not_called()
-    mock.fulfillment_available_intent.assert_not_called()
+    mock.dialog_available_intent.assert_called_once()
     mock.fulfillment_unavailable_intent.assert_not_called()
+    mock.fulfillment_available_intent.assert_not_called()
 
 
 def test_fulfillment():
@@ -102,7 +102,7 @@ def test_fulfillment():
             "version": "string",
         },
         "interpretations": [],
-        "requestAttributes": {"string": "string"},
+        "requestAttributes": {"request_1": "request_value"},
         "sessionState": {
             "activeContexts": [
                 {
@@ -111,15 +111,15 @@ def test_fulfillment():
                     "timeToLive": {"timeToLiveInSeconds": 123, "turnsToLive": 33},
                 }
             ],
-            "sessionAttributes": {"string": "string"},
+            "sessionAttributes": {"session_1": "session_value"},
             "dialogAction": {"slotToElicit": "string", "type": "Close"},
             "intent": {
                 "confirmationState": "Confirmed",
                 "name": "available-intent",
                 "slots": {
-                    "string": {
+                    "slot_1": {
                         "value": {
-                            "interpretedValue": "string",
+                            "interpretedValue": "slot_value",
                             "originalValue": "string",
                             "resolvedValues": ["string"],
                         }
@@ -133,7 +133,11 @@ def test_fulfillment():
     }
 
     handler(input_event, {})
-    mock.dialog_available_intent.assert_not_called()
     mock.dialog_unavailable_intent.assert_not_called()
-    mock.fulfillment_available_intent.assert_called_once()
+    mock.dialog_available_intent.assert_not_called()
     mock.fulfillment_unavailable_intent.assert_not_called()
+    mock.fulfillment_available_intent.assert_called_once_with(
+        {"slot_1": "slot_value"},
+        {"session_1": "session_value"},
+        {"request_1": "request_value"},
+    )
